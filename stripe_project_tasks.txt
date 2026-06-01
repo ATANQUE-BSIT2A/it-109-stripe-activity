@@ -1,0 +1,37 @@
+Stripe Project Tasks:
+
+1. Create at least three products in the product catalog.
+- Short description
+- Amount
+
+2. Products should reflect in the form. Can use a dropdown. Amount as non-clickable or label. Then click the product and payment.
+
+3. Change the descriptions for the products to be dynamic and should be about the product being sent (Like subscription level 1) etc... 
+
+
+Checking:
+1. Products
+2. Description
+3. Successful Transactions
+4. Successful Customer Creation
+
+Additional note by our professor: Do NOT forget to include quantity in your project.
+
+Secret key: 
+
+Original Prompt:
+
+
+These are the instructions for our final activity in IT 109 (Integrative Programming). 
+
+I also included the new secret key in the notes, because I deleted our old Stripe Business and created a new one from scratch. Also, 
+
+C:\xampp\htdocs\ATANQUE\stripe_api_finals_activity_group3\api_stripe2
+
+is the original project file from our professor, without the customizations we made, since we already have some customizations in this folder. We only don't have the quantity yet. We also plan on creating different products.
+
+I want the original pay.php page to be as simple and similar to our professor's structure as possible (No CSS, or design elements, only the necessary dropdowns and elements needed.)
+
+But then we also want to create another page that is similar to PHP but actually has a store design theme but still functions the same as the original code, so that we have options for our professor to check.
+
+
