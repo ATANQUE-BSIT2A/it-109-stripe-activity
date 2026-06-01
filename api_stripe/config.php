@@ -11,7 +11,8 @@ return [
             'amount' => 18.00,
             'currency' => 'usd',
             'images' => ['../items/cap-front.png', '../items/cap-side.png', '../items/cap-back.png'],
-            'stripe_product_id' => 'prod_UcneCAM5OpsZFo'
+            'stripe_product_id' => 'prod_UcneCAM5OpsZFo',
+            'stripe_price_id' => 'price_1TdY3AI3A0ZbIpv7Ss5KrBhM'
         ],
         [
             'id' => 'peace-maker-white-tee',
@@ -20,7 +21,8 @@ return [
             'amount' => 28.00,
             'currency' => 'usd',
             'images' => ['../items/white-front.png', '../items/white-back.png'],
-            'stripe_product_id' => 'prod_UcnfQGt9vCwqIG'
+            'stripe_product_id' => 'prod_UcnfQGt9vCwqIG',
+            'stripe_price_id' => 'price_1TdY4PI3A0ZbIpv7TEsJ4BtN'
         ],
         [
             'id' => 'riot-rebel-peace-black-tee',
@@ -29,7 +31,8 @@ return [
             'amount' => 28.00,
             'currency' => 'usd',
             'images' => ['../items/black-front.png', '../items/black-back.png'],
-            'stripe_product_id' => 'prod_UcngXgKTDmAwKG'
+            'stripe_product_id' => 'prod_UcngXgKTDmAwKG',
+            'stripe_price_id' => 'price_1TdY52I3A0ZbIpv7w4bwJsEB'
         ],
         [
             'id' => 'collective-relaxed-crewneck',
@@ -38,7 +41,8 @@ return [
             'amount' => 48.00,
             'currency' => 'usd',
             'images' => ['../items/sweater-front.png', '../items/sweater-back.png'],
-            'stripe_product_id' => 'prod_UcngJ6QHGDHIXq'
+            'stripe_product_id' => 'prod_UcngJ6QHGDHIXq',
+            'stripe_price_id' => 'price_1TdY5WI3A0ZbIpv7Pj4Cntrf'
         ],
         [
             'id' => 'after-hours-oversized-hoodie',
@@ -47,7 +51,8 @@ return [
             'amount' => 88.00,
             'currency' => 'usd',
             'images' => ['../items/hoodie-front.png', '../items/hoodie-back.png'],
-            'stripe_product_id' => 'prod_UcnhsYVM7u13Cs'
+            'stripe_product_id' => 'prod_UcnhsYVM7u13Cs',
+            'stripe_price_id' => 'price_1TdY61I3A0ZbIpv7lQJ0jMDH'
         ]
     ]
 ];

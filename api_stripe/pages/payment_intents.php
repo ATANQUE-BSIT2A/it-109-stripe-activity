@@ -90,9 +90,8 @@ if (isset($input['product_id']) && trim((string) $input['product_id']) !== '') {
     }
 }
 
-// Create a card-based PaymentIntent for the converted Stripe amount.
+// Create a card-based Payment Intent
 $paymentIntentPayload = [
-    'amount' => (string) $stripeAmount,
     'currency' => strtolower(trim((string) $input['currency'])),
     'customer' => $customerId,
     'payment_method_types[0]' => 'card',
@@ -100,6 +99,8 @@ $paymentIntentPayload = [
 
 // Add product metadata
 if ($selectedProduct) {
+    // Always use the amount from the product (multiplied by quantity)
+    $paymentIntentPayload['amount'] = (string) $stripeAmount;
     $paymentIntentPayload['description'] = $selectedProduct['name'] . ' x ' . $quantity;
     $paymentIntentPayload['metadata[product_id]'] = $selectedProduct['id'];
     $paymentIntentPayload['metadata[product_name]'] = $selectedProduct['name'];
@@ -107,6 +108,12 @@ if ($selectedProduct) {
     if (isset($selectedProduct['stripe_product_id'])) {
         $paymentIntentPayload['metadata[stripe_product_id]'] = $selectedProduct['stripe_product_id'];
     }
+    if (isset($selectedProduct['stripe_price_id'])) {
+        $paymentIntentPayload['metadata[stripe_price_id]'] = $selectedProduct['stripe_price_id'];
+    }
+} else {
+    // Fallback for custom amounts
+    $paymentIntentPayload['amount'] = (string) $stripeAmount;
 }
 
 if (!$selectedProduct && isset($input['description']) && trim((string) $input['description']) !== '') {
