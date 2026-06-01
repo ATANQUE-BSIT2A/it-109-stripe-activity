@@ -109,7 +109,7 @@ if ($selectedProduct) {
     }
 }
 
-if (isset($input['description']) && trim((string) $input['description']) !== '') {
+if (!$selectedProduct && isset($input['description']) && trim((string) $input['description']) !== '') {
     $paymentIntentPayload['description'] = trim((string) $input['description']);
 }
 

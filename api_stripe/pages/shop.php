@@ -335,6 +335,7 @@ $products = Config::getProducts();
             submitBtn.textContent = 'Sending...';
 
             const payload = {
+                product_id: productSelect.value,
                 customer_name: document.getElementById('customer_name').value,
                 customer_email: document.getElementById('customer_email').value,
                 amount: Number(document.getElementById('amount').value),
