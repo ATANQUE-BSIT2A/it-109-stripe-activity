@@ -46,7 +46,15 @@ if (!isset($input['amount'])) {
     ApiResponse::error('Field "amount" is required.', 422);
 }
 
-$stripeAmount = convertAmountToStripeAmount((string) $input['amount'], (string) $input['currency']);
+// Get quantity (default to 1 if not provided)
+$quantity = isset($input['quantity']) ? (int) $input['quantity'] : 1;
+if ($quantity < 1) {
+    ApiResponse::error('Field "quantity" must be at least 1.', 422);
+}
+
+// Multiply amount by quantity
+$totalAmount = (float) $input['amount'] * $quantity;
+$stripeAmount = convertAmountToStripeAmount((string) $totalAmount, (string) $input['currency']);
 if ($stripeAmount < 1) {
     ApiResponse::error('Field "amount" must be greater than zero.', 422);
 }
@@ -97,6 +105,8 @@ ApiResponse::json([
     'success' => $customerResult['ok'] && $paymentIntentResult['ok'],
     'stripe_status_code' => $paymentIntentResult['status_code'],
     'submitted_amount' => (string) $input['amount'],
+    'quantity' => $quantity,
+    'total_amount' => (string) $totalAmount,
     'stripe_amount' => $stripeAmount,
     'customer' => $customerResult['data'],
     'payment_intent' => $paymentIntentResult['data'],

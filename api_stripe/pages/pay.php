@@ -110,6 +110,11 @@ $products = Config::getProducts();
         </div>
 
         <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+        </div>
+
+        <div class="form-group">
             <label for="payment_method">Payment Method</label>
             <input type="text" id="payment_method" name="payment_method" value="pm_card_visa">
         </div>
@@ -173,7 +178,8 @@ $products = Config::getProducts();
                 amount: Number(document.getElementById('amount').value),
                 currency: document.getElementById('currency').value,
                 description: document.getElementById('description').value,
-                payment_method: document.getElementById('payment_method').value
+                payment_method: document.getElementById('payment_method').value,
+                quantity: Number(document.getElementById('quantity').value)
             };
 
             try {

@@ -19,6 +19,7 @@ require_once __DIR__ . '/bootstrap.php';
     <h2>Available Pages</h2>
     <ul>
         <li><a href="pages/pay.php">Pay</a></li>
+        <li><a href="pages/shop.php">Shop (Designed Version)</a></li>
         <li><a href="pages/health.php">Health Check</a></li>
     </ul>
 
