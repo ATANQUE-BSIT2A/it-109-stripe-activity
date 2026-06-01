@@ -76,6 +76,20 @@ if ($customerId === '') {
     ApiResponse::error('Stripe did not return a customer ID.', 500);
 }
 
+// Load products from config
+$config = require __DIR__ . '/../config.php';
+$products = $config['products'];
+$selectedProduct = null;
+
+if (isset($input['product_id']) && trim((string) $input['product_id']) !== '') {
+    foreach ($products as $product) {
+        if ($product['id'] === $input['product_id']) {
+            $selectedProduct = $product;
+            break;
+        }
+    }
+}
+
 // Create a card-based PaymentIntent for the converted Stripe amount.
 $paymentIntentPayload = [
     'amount' => (string) $stripeAmount,
@@ -83,6 +97,17 @@ $paymentIntentPayload = [
     'customer' => $customerId,
     'payment_method_types[0]' => 'card',
 ];
+
+// Add product metadata
+if ($selectedProduct) {
+    $paymentIntentPayload['description'] = $selectedProduct['name'] . ' x ' . $quantity;
+    $paymentIntentPayload['metadata[product_id]'] = $selectedProduct['id'];
+    $paymentIntentPayload['metadata[product_name]'] = $selectedProduct['name'];
+    $paymentIntentPayload['metadata[quantity]'] = $quantity;
+    if (isset($selectedProduct['stripe_product_id'])) {
+        $paymentIntentPayload['metadata[stripe_product_id]'] = $selectedProduct['stripe_product_id'];
+    }
+}
 
 if (isset($input['description']) && trim((string) $input['description']) !== '') {
     $paymentIntentPayload['description'] = trim((string) $input['description']);
