@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
+
+// Load our products from config.php
 $products = Config::getProducts();
 ?>
 <!DOCTYPE html>
@@ -205,18 +207,24 @@ $products = Config::getProducts();
     </style>
 </head>
 <body>
+    <!-- Header with logo -->
     <div class="header">
         <img src="../logo.png" alt="Logo">
     </div>
+
     <div class="container">
         <div class="product-page">
+            <!-- Left side: Product images with navigation -->
             <div class="product-images">
                 <img id="mainImage" class="main-image" src="<?php echo htmlspecialchars($products[0]['images'][0]); ?>" alt="Product">
                 <button class="image-nav prev" id="prevBtn">&#8592;</button>
                 <button class="image-nav next" id="nextBtn">&#8594;</button>
             </div>
+
+            <!-- Right side: Product details and payment form -->
             <div class="product-details">
                 <form id="payment-form">
+                    <!-- Product dropdown -->
                     <div class="form-group">
                         <label for="product">Select Product</label>
                         <select id="product" name="product" required>
@@ -234,41 +242,49 @@ $products = Config::getProducts();
                         </select>
                     </div>
 
+                    <!-- Product title, price, description (dynamic) -->
                     <h1 class="product-title" id="productTitle"><?php echo htmlspecialchars($products[0]['name']); ?></h1>
                     <div class="product-price" id="productPrice">$<?php echo number_format($products[0]['amount'], 2); ?> <?php echo strtoupper($products[0]['currency']); ?></div>
                     
                     <span class="description-label">Description</span>
                     <p class="product-description" id="productDescription"><?php echo htmlspecialchars($products[0]['description']); ?></p>
 
+                    <!-- Customer name -->
                     <div class="form-group">
                         <label for="customer_name">Customer Name</label>
                         <input type="text" id="customer_name" name="customer_name" value="Jane Doe" required>
                     </div>
 
+                    <!-- Customer email -->
                     <div class="form-group">
                         <label for="customer_email">Customer Email</label>
                         <input type="email" id="customer_email" name="customer_email" value="jane@example.com" required>
                     </div>
 
+                    <!-- Quantity -->
                     <div class="form-group">
                         <label for="quantity">Quantity</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" required>
                     </div>
 
+                    <!-- Test payment method -->
                     <div class="form-group">
                         <label for="payment_method">Payment Method</label>
                         <input type="text" id="payment_method" name="payment_method" value="pm_card_visa">
                     </div>
 
+                    <!-- Hidden fields (set when product is selected) -->
                     <div class="form-group" style="display: none;">
                         <input type="hidden" id="amount" name="amount" value="<?php echo htmlspecialchars((string)$products[0]['amount']); ?>">
                         <input type="hidden" id="currency" name="currency" value="<?php echo htmlspecialchars($products[0]['currency']); ?>">
                         <input type="hidden" id="description" name="description" value="<?php echo htmlspecialchars($products[0]['description']); ?>">
                     </div>
 
+                    <!-- Submit button -->
                     <button type="submit" class="submit-btn" id="submitBtn">Buy Now</button>
                 </form>
 
+                <!-- Response section (hidden by default) -->
                 <div class="response-section" id="responseSection" style="display: none;">
                     <h2 class="response-title">Response</h2>
                     <pre id="result"></pre>
@@ -295,7 +311,8 @@ $products = Config::getProducts();
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
-        productSelect.addEventListener('change', function() {
+        // When user selects a new product: update all product details and images
+         .addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const name = selectedOption.dataset.name;
             const description = selectedOption.dataset.description;
@@ -314,6 +331,7 @@ $products = Config::getProducts();
             descriptionInput.value = description;
         });
 
+        // When user clicks "previous" button: cycle to previous image
         prevBtn.addEventListener('click', function() {
             if (currentImages.length > 0) {
                 currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
@@ -321,6 +339,7 @@ $products = Config::getProducts();
             }
         });
 
+        // When user clicks "next" button: cycle to next image
         nextBtn.addEventListener('click', function() {
             if (currentImages.length > 0) {
                 currentImageIndex = (currentImageIndex + 1) % currentImages.length;
@@ -328,12 +347,14 @@ $products = Config::getProducts();
             }
         });
 
+        // When user submits the form: send data to payment_intents.php
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
 
+            // Prepare data to send
             const payload = {
                 product_id: productSelect.value,
                 customer_name: document.getElementById('customer_name').value,
@@ -346,6 +367,7 @@ $products = Config::getProducts();
             };
 
             try {
+                // Send POST request to payment_intents.php
                 const response = await fetch('./payment_intents.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

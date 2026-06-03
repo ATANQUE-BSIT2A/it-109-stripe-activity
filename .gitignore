@@ -2,5 +2,4 @@
 api_stripe/logs/
 
 # Ignore config with secrets
-# (Uncomment if you want to ignore config.php entirely)
-# api_stripe/config.php
+api_stripe/config.php

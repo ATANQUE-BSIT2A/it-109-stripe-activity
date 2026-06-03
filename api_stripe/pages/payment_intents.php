@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/bootstrap.php';
 
+// ============================================================================
+// PAYMENT INTENTS API ENDPOINT
+// This is where we process payments: create customer, create payment intent, etc.
+// ============================================================================
+
+// Only allow POST requests (no GET requests allowed here!)
 Request::requireMethod(['POST']);
 
-// Stripe expects the amount in the smallest currency unit.
-// Example: 10.99 USD must be sent as 1099.
-// DO NOT TOUCH
+// ----------------------------------------------------------------------------
+// Helper function: Converts dollars to cents (Stripe uses the smallest currency unit!)
+// Example: $18.00 becomes 1800 cents
+// ----------------------------------------------------------------------------
 function convertAmountToStripeAmount(string $amount, string $currency): int
 {
     $normalizedAmount = str_replace(',', '', trim($amount));
@@ -16,7 +23,7 @@ function convertAmountToStripeAmount(string $amount, string $currency): int
         throw new InvalidArgumentException('Field "amount" is required and must be numeric.');
     }
 
-    // These currencies do not use cents, so 100 JPY stays 100.
+    // These currencies don't use cents (e.g., 100 JPY stays 100)
     $zeroDecimalCurrencies = [
         'bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg',
         'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf',
@@ -29,15 +36,21 @@ function convertAmountToStripeAmount(string $amount, string $currency): int
         return (int) round($numericAmount);
     }
 
+    // Multiply by 100 to convert dollars to cents
     return (int) round($numericAmount * 100);
 }
 
-// Start editing here
+// ----------------------------------------------------------------------------
+// Step 1: Initialize Stripe client and read input data
+// ----------------------------------------------------------------------------
 $client = new StripeClient();
 
-// Read the JSON body sent from the HTML form or another frontend.
+// Read the JSON data sent from the frontend
 $input = Request::input();
 
+// ----------------------------------------------------------------------------
+// Step 2: Validate required input fields
+// ----------------------------------------------------------------------------
 if (!isset($input['currency']) || trim((string) $input['currency']) === '') {
     ApiResponse::error('Field "currency" is required.', 422);
 }
@@ -52,31 +65,37 @@ if ($quantity < 1) {
     ApiResponse::error('Field "quantity" must be at least 1.', 422);
 }
 
-// Multiply amount by quantity
+// Calculate total amount and convert to cents for Stripe
 $totalAmount = (float) $input['amount'] * $quantity;
 $stripeAmount = convertAmountToStripeAmount((string) $totalAmount, (string) $input['currency']);
 if ($stripeAmount < 1) {
     ApiResponse::error('Field "amount" must be greater than zero.', 422);
 }
 
-// Create the customer first so the payment can be attached to a real Stripe customer.
+// ----------------------------------------------------------------------------
+// Step 3: Create a customer in Stripe
+// ----------------------------------------------------------------------------
 $customerPayload = array_filter([
     'name' => isset($input['customer_name']) ? trim((string) $input['customer_name']) : null,
     'email' => isset($input['customer_email']) ? trim((string) $input['customer_email']) : null,
     'description' => isset($input['customer_description']) ? trim((string) $input['customer_description']) : null,
 ], static fn (mixed $value): bool => $value !== null && $value !== '');
 
+// Send customer data to Stripe
 $customerResult = $client->post('/v1/customers', $customerPayload);
 if (!$customerResult['ok']) {
     ApiResponse::json($customerResult, $customerResult['status_code']);
 }
 
+// Get the customer ID that Stripe gave us
 $customerId = (string) ($customerResult['data']['id'] ?? '');
 if ($customerId === '') {
     ApiResponse::error('Stripe did not return a customer ID.', 500);
 }
 
-// Load products from config
+// ----------------------------------------------------------------------------
+// Step 4: Find the selected product from our config
+// ----------------------------------------------------------------------------
 $config = require __DIR__ . '/../config.php';
 $products = $config['products'];
 $selectedProduct = null;
@@ -90,16 +109,17 @@ if (isset($input['product_id']) && trim((string) $input['product_id']) !== '') {
     }
 }
 
-// Create a card-based Payment Intent
+// ----------------------------------------------------------------------------
+// Step 5: Create a Payment Intent in Stripe
+// ----------------------------------------------------------------------------
 $paymentIntentPayload = [
     'currency' => strtolower(trim((string) $input['currency'])),
     'customer' => $customerId,
     'payment_method_types[0]' => 'card',
 ];
 
-// Add product metadata
+// Add product details if a product was selected
 if ($selectedProduct) {
-    // Always use the amount from the product (multiplied by quantity)
     $paymentIntentPayload['amount'] = (string) $stripeAmount;
     $paymentIntentPayload['description'] = $selectedProduct['name'] . ' x ' . $quantity;
     $paymentIntentPayload['metadata[product_id]'] = $selectedProduct['id'];
@@ -112,27 +132,32 @@ if ($selectedProduct) {
         $paymentIntentPayload['metadata[stripe_price_id]'] = $selectedProduct['stripe_price_id'];
     }
 } else {
-    // Fallback for custom amounts
+    // Fallback for custom amounts (without a product)
     $paymentIntentPayload['amount'] = (string) $stripeAmount;
 }
 
+// Add description if no product selected
 if (!$selectedProduct && isset($input['description']) && trim((string) $input['description']) !== '') {
     $paymentIntentPayload['description'] = trim((string) $input['description']);
 }
 
+// Add receipt email if provided
 if (isset($input['receipt_email']) && trim((string) $input['receipt_email']) !== '') {
     $paymentIntentPayload['receipt_email'] = trim((string) $input['receipt_email']);
 }
 
+// If test payment method is provided, confirm the payment immediately
 if (isset($input['payment_method']) && trim((string) $input['payment_method']) !== '') {
-    // If a payment method is supplied, confirm the payment immediately.
     $paymentIntentPayload['payment_method'] = trim((string) $input['payment_method']);
     $paymentIntentPayload['confirm'] = 'true';
 }
 
+// Send the Payment Intent to Stripe!
 $paymentIntentResult = $client->post('/v1/payment_intents', $paymentIntentPayload);
 
-// Return both the original amount and Stripe-ready amount for easier debugging.
+// ----------------------------------------------------------------------------
+// Step 6: Send the response back to the frontend
+// ----------------------------------------------------------------------------
 ApiResponse::json([
     'success' => $customerResult['ok'] && $paymentIntentResult['ok'],
     'stripe_status_code' => $paymentIntentResult['status_code'],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/bootstrap.php';
 
+// Load our products from config.php
 $products = Config::getProducts();
 ?>
 <!DOCTYPE html>
@@ -62,6 +63,7 @@ $products = Config::getProducts();
     <h1>Stripe Payment Test</h1>
 
     <form id="payment-form">
+        <!-- Product dropdown -->
         <div class="form-group">
             <label for="product">Select Product</label>
             <select id="product" name="product" required>
@@ -78,6 +80,7 @@ $products = Config::getProducts();
             </select>
         </div>
 
+        <!-- Product details (hidden until product is selected) -->
         <div class="product-details" id="product-details" style="display: none;">
             <h3>Product Details</h3>
             <p><strong>Name:</strong> <span id="product-name"></span></p>
@@ -85,16 +88,19 @@ $products = Config::getProducts();
             <p><strong>Amount:</strong> <span id="product-amount"></span></p>
         </div>
 
+        <!-- Customer name -->
         <div class="form-group">
             <label for="customer_name">Customer Name</label>
             <input type="text" id="customer_name" name="customer_name" value="Jane Doe" required>
         </div>
 
+        <!-- Customer email -->
         <div class="form-group">
             <label for="customer_email">Customer Email</label>
             <input type="email" id="customer_email" name="customer_email" value="jane@example.com" required>
         </div>
 
+        <!-- Hidden fields (set when product is selected) -->
         <div class="form-group" style="display: none;">
             <label for="amount">Amount</label>
             <input type="number" id="amount" name="amount" value="10.99" min="0.01" step="0.01" required>
@@ -109,11 +115,13 @@ $products = Config::getProducts();
             <input type="hidden" id="description" name="description" value="Test payment">
         </div>
 
+        <!-- Quantity -->
         <div class="form-group">
             <label for="quantity">Quantity</label>
             <input type="number" id="quantity" name="quantity" value="1" min="1" required>
         </div>
 
+        <!-- Test payment method (pm_card_visa is a test Visa card that always works) -->
         <div class="form-group">
             <label for="payment_method">Payment Method</label>
             <input type="text" id="payment_method" name="payment_method" value="pm_card_visa">
@@ -124,6 +132,7 @@ $products = Config::getProducts();
         </div>
     </form>
 
+    <!-- Where we show the response from the API -->
     <h2>Response</h2>
     <pre id="result"></pre>
 
@@ -139,6 +148,7 @@ $products = Config::getProducts();
         const currencyInput = document.getElementById('currency');
         const descriptionInput = document.getElementById('description');
 
+        // When user selects a product: update product details and hidden fields
         productSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             
@@ -162,9 +172,11 @@ $products = Config::getProducts();
             }
         });
 
+        // When user submits the form: send data to payment_intents.php
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            // Make sure a product is selected
             if (!productSelect.value) {
                 alert('Please select a product first!');
                 return;
@@ -172,6 +184,7 @@ $products = Config::getProducts();
 
             result.textContent = 'Sending request...';
 
+            // Prepare data to send
             const payload = {
                 product_id: productSelect.value,
                 customer_name: document.getElementById('customer_name').value,
@@ -184,6 +197,7 @@ $products = Config::getProducts();
             };
 
             try {
+                // Send POST request to payment_intents.php
                 const response = await fetch('./payment_intents.php', {
                     method: 'POST',
                     headers: {
@@ -192,6 +206,7 @@ $products = Config::getProducts();
                     body: JSON.stringify(payload)
                 });
 
+                // Show the response
                 const data = await response.json();
                 result.textContent = JSON.stringify(data, null, 2);
             } catch (error) {

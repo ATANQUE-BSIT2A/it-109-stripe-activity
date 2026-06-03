@@ -18,19 +18,19 @@ require_once __DIR__ . '/bootstrap.php';
 
     <h2>Available Pages</h2>
     <ul>
-        <li><a href="pages/pay.php">Pay</a></li>
-        <li><a href="pages/shop.php">Shop (Designed Version)</a></li>
-        <li><a href="pages/health.php">Health Check</a></li>
+        <li><a href="pages/pay.php">Pay</a> - Professor's original basic version</li>
+        <li><a href="pages/shop.php">Shop (Designed Version)</a> - Our custom styled version</li>
+        <li><a href="pages/health.php">Health Check</a> - Makes sure our API is working</li>
     </ul>
 
     <h2>API Endpoint</h2>
-    <p><code>POST /pages/payment_intents.php</code></p>
+    <p><code>POST /pages/payment_intents.php</code> - Where we send payment data</p>
 
     <h2>Notes</h2>
     <ul>
         <li>Use your Stripe test secret key in <code>config.php</code>.</li>
         <li>Open Stripe in test mode to see the customer and payment objects.</li>
-        <li>The payment form is available from the link above.</li>
+        <li>The payment form is available from the links above.</li>
     </ul>
 </body>
 </html>
