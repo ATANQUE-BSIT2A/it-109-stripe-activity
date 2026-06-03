@@ -312,7 +312,7 @@ $products = Config::getProducts();
         const nextBtn = document.getElementById('nextBtn');
 
         // When user selects a new product: update all product details and images
-         .addEventListener('change', function() {
+        productSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const name = selectedOption.dataset.name;
             const description = selectedOption.dataset.description;
